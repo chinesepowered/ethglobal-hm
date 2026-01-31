@@ -204,8 +204,8 @@ export function SetupForm() {
       {/* Token */}
       <div>
         <label className="block text-sm text-gray-400 mb-2">Receive payments in</label>
-        <div className="grid grid-cols-3 gap-2">
-          {['USDC', 'ETH', 'DAI'].map((t) => (
+        <div className="grid grid-cols-2 gap-2">
+          {['USDC', 'ETH'].map((t) => (
             <button
               key={t}
               onClick={() => setToken(t)}

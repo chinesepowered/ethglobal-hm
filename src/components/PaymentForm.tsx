@@ -22,7 +22,13 @@ export function PaymentForm({ config }: { config: PaymentConfig }) {
   // Merchant's preferred destination
   const merchantChainId = config.chainId || 11155111
   const isCrossChain = chainId !== merchantChainId
-  const merchantUSDC = USDC_ADDRESSES[merchantChainId]
+  const merchantToken = config.token || 'USDC'
+
+  // Resolve merchant's desired receive-token address on their chain
+  const toTokenAddr =
+    merchantToken === 'ETH'
+      ? NATIVE_TOKEN
+      : USDC_ADDRESSES[merchantChainId] || NATIVE_TOKEN
 
   // Payer's balance
   const { data: balance } = useBalance({ address, chainId })
@@ -37,16 +43,15 @@ export function PaymentForm({ config }: { config: PaymentConfig }) {
     }
   }, [amount, selectedToken.decimals])
 
-  // Token addresses
+  // Payer's source token address
   const fromTokenAddr =
     selectedToken.symbol === 'USDC'
       ? USDC_ADDRESSES[chainId] || NATIVE_TOKEN
       : selectedToken.address
-  const toTokenAddr = merchantUSDC || NATIVE_TOKEN
 
   // Do we need LI.FI routing? (cross-chain or different token)
   const needsRoute =
-    isCrossChain || selectedToken.symbol !== config.token
+    isCrossChain || selectedToken.symbol !== merchantToken
 
   // Build LI.FI quote params
   const quoteParams = useMemo(() => {
