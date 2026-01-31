@@ -146,10 +146,15 @@ User enters amount → PaymentForm
   → if cross-chain or cross-token: useLiFiQuote hook
     → lib/lifi.ts getQuote()
     → LI.FI returns quote with transactionRequest
+  → if LI.FI unavailable (e.g. testnet): falls back to direct ETH transfer
 
 User clicks Pay → usePayment hook
+  → if ERC-20 token and quote.estimate.approvalAddress:
+    → check allowance via useReadContract (erc20Abi.allowance)
+    → if insufficient: show "Approve" button → writeContract(approve)
+    → after approval: show "Pay" button
   → if routed: sendTransaction(quote.transactionRequest)
-  → if direct: sendTransaction({ to, value })
+  → if direct/fallback: sendTransaction({ to, value })
   → TransactionStatus tracks: sending → confirming → success/error
 ```
 
@@ -196,20 +201,21 @@ All keys are namespaced under `com.enspaylinks.`:
 ## Known Limitations & Future Work
 
 ### Current Limitations
-1. **ERC-20 approval flow**: When payer selects USDC, the LI.FI route may require a token approval step. The current UI does not show a separate approval transaction — it relies on LI.FI's `transactionRequest` which may include approval. If the user needs a separate approval, the transaction will fail and show an error. A proper two-step (approve → swap) flow should be added.
+1. **Token balance validation**: The PaymentForm shows the payer's native balance but does not check if the payer has sufficient ERC-20 balance when paying with USDC. The button should be disabled with a "Insufficient balance" message.
 
-2. **Token balance validation**: The PaymentForm shows the payer's native balance but does not check if the payer has sufficient ERC-20 balance when paying with USDC. The button should be disabled with a "Insufficient balance" message.
+2. **ENS name validation**: No client-side validation that the input is a valid ENS name format before attempting resolution.
 
-3. **ENS name validation**: No client-side validation that the input is a valid ENS name format before attempting resolution.
+3. **LI.FI testnet support**: LI.FI may not return routes for all testnet pairs. On testnets, the app falls back to direct ETH transfers for same-chain payments. Cross-chain testnet payments require LI.FI support for the chain pair.
 
-4. **LI.FI testnet support**: LI.FI may not return routes for all testnet pairs. On testnets, the app falls back to direct transfers for same-chain payments but cross-chain testnet payments may not work.
+4. **Circle integration depth**: Currently Circle/USDC is the settlement token, but deeper Circle integration (Programmable Wallets, Gateway, Bridge Kit) is stubbed but not implemented. The `CIRCLE_API_KEY` env var exists but no API routes use it yet.
 
-5. **Circle integration depth**: Currently Circle/USDC is the settlement token, but deeper Circle integration (Programmable Wallets, Gateway, Bridge Kit) is stubbed but not implemented. The `CIRCLE_API_KEY` env var exists but no API routes use it yet.
+5. **No payment receipts or history**: Transactions complete and show a success screen with an explorer link, but there's no persistent receipt storage or payment history view.
 
-6. **No payment receipts or history**: Transactions complete and show a success screen with an explorer link, but there's no persistent receipt storage or payment history view.
+### Implemented
+- **ERC-20 approval flow**: PaymentForm detects when LI.FI's `approvalAddress` needs an allowance, checks current allowance via `erc20Abi.allowance`, and shows a two-step "Approve → Pay" UI.
+- **LI.FI fallback**: When LI.FI returns no route (common on testnets), same-chain payments fall back to direct ETH transfer with a yellow banner explaining the fallback. Cross-chain shows a red error suggesting the user switch chains.
 
 ### Planned Improvements
-- **ERC-20 approval flow**: Detect when approval is needed, show a two-step UI (Approve → Pay)
 - **Circle Programmable Wallets**: Let merchants create a Circle-hosted wallet during setup for those who don't have their own
 - **Circle Gateway integration**: Server-side API route to verify USDC settlement and provide fiat off-ramp
 - **Payment history**: Store payment metadata (payer, amount, token, chain, tx hash, timestamp) via ENS text records or an offchain index

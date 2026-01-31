@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { useAccount, useBalance, useChainId } from 'wagmi'
-import { parseUnits, formatUnits } from 'viem'
+import { useAccount, useBalance, useChainId, useReadContract, useWriteContract } from 'wagmi'
+import { parseUnits, formatUnits, erc20Abi } from 'viem'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { PaymentConfig } from '@/lib/ens'
 import { useLiFiQuote } from '@/hooks/useLiFiQuote'
@@ -11,29 +11,37 @@ import { USDC_ADDRESSES, CHAIN_META, PAY_TOKENS, NATIVE_TOKEN } from '@/lib/cons
 import { RoutePreview } from './RoutePreview'
 import { TransactionStatus } from './TransactionStatus'
 
+const ZERO: `0x${string}` = '0x0000000000000000000000000000000000000000'
+
 export function PaymentForm({ config }: { config: PaymentConfig }) {
   const { address, isConnected } = useAccount()
   const chainId = useChainId()
   const payment = usePayment()
+  const { writeContractAsync } = useWriteContract()
 
   const [amount, setAmount] = useState(config.suggestedAmount || '')
   const [selectedToken, setSelectedToken] = useState<(typeof PAY_TOKENS)[number]>(PAY_TOKENS[0])
+  const [approving, setApproving] = useState(false)
+  const [approved, setApproved] = useState(false)
 
-  // Merchant's preferred destination
+  // ── Merchant destination ──────────────────────────────────────────
   const merchantChainId = config.chainId || 11155111
   const isCrossChain = chainId !== merchantChainId
   const merchantToken = config.token || 'USDC'
 
-  // Resolve merchant's desired receive-token address on their chain
   const toTokenAddr =
     merchantToken === 'ETH'
       ? NATIVE_TOKEN
       : USDC_ADDRESSES[merchantChainId] || NATIVE_TOKEN
 
-  // Payer's balance
+  // ── Payer state ───────────────────────────────────────────────────
+  const isNativeToken = selectedToken.symbol === 'ETH'
+  const fromTokenAddr = isNativeToken
+    ? NATIVE_TOKEN
+    : USDC_ADDRESSES[chainId] || NATIVE_TOKEN
+
   const { data: balance } = useBalance({ address, chainId })
 
-  // Amount in smallest unit
   const fromAmount = useMemo(() => {
     if (!amount || isNaN(parseFloat(amount))) return '0'
     try {
@@ -43,17 +51,9 @@ export function PaymentForm({ config }: { config: PaymentConfig }) {
     }
   }, [amount, selectedToken.decimals])
 
-  // Payer's source token address
-  const fromTokenAddr =
-    selectedToken.symbol === 'USDC'
-      ? USDC_ADDRESSES[chainId] || NATIVE_TOKEN
-      : selectedToken.address
+  // ── Routing decision ──────────────────────────────────────────────
+  const needsRoute = isCrossChain || selectedToken.symbol !== merchantToken
 
-  // Do we need LI.FI routing? (cross-chain or different token)
-  const needsRoute =
-    isCrossChain || selectedToken.symbol !== merchantToken
-
-  // Build LI.FI quote params
   const quoteParams = useMemo(() => {
     if (!needsRoute || !address || !config.address || fromAmount === '0') return null
     return {
@@ -69,23 +69,71 @@ export function PaymentForm({ config }: { config: PaymentConfig }) {
 
   const { quote, loading: quoteLoading, error: quoteError } = useLiFiQuote(quoteParams)
 
-  // Pay handler
+  // ── ERC-20 approval ───────────────────────────────────────────────
+  const approvalAddress = (quote?.estimate?.approvalAddress ?? ZERO) as `0x${string}`
+  const shouldCheckAllowance = !isNativeToken && !!quote && approvalAddress !== ZERO && !!address
+
+  const { data: currentAllowance } = useReadContract({
+    address: fromTokenAddr as `0x${string}`,
+    abi: erc20Abi,
+    functionName: 'allowance',
+    args: [address ?? ZERO, approvalAddress],
+    query: { enabled: shouldCheckAllowance },
+  })
+
+  const needsApproval =
+    shouldCheckAllowance &&
+    currentAllowance !== undefined &&
+    currentAllowance < BigInt(fromAmount || '0') &&
+    !approved
+
+  async function handleApprove() {
+    if (!approvalAddress || approvalAddress === ZERO) return
+    setApproving(true)
+    try {
+      await writeContractAsync({
+        address: fromTokenAddr as `0x${string}`,
+        abi: erc20Abi,
+        functionName: 'approve',
+        args: [approvalAddress, BigInt(fromAmount)],
+      })
+      setApproved(true)
+    } catch {
+      // user rejected or tx failed — stay on approve step
+    } finally {
+      setApproving(false)
+    }
+  }
+
+  // ── Fallback: direct transfer when LI.FI has no route ─────────────
+  // Possible on same-chain only (can't bridge without a router).
+  const lifiUnavailable = needsRoute && !quoteLoading && !quote && !!quoteError
+  const canFallback = lifiUnavailable && !isCrossChain
+
+  // ── Pay handler ───────────────────────────────────────────────────
   async function handlePay() {
     if (!config.address) return
 
-    if (needsRoute && quote) {
+    // LI.FI routed payment
+    if (quote && !needsApproval) {
       await payment.executeLiFi(quote)
-    } else if (!needsRoute && selectedToken.symbol === 'ETH') {
+      return
+    }
+
+    // Direct native-token transfer (same chain, same token OR fallback)
+    if (!needsRoute || canFallback) {
       await payment.executeDirect(config.address, amount, chainId)
-    } else if (quote) {
-      await payment.executeLiFi(quote)
     }
   }
 
   const validAmount = !!amount && parseFloat(amount) > 0
-  const canPay = isConnected && validAmount && (needsRoute ? !!quote : true)
+  const canPay =
+    isConnected &&
+    validAmount &&
+    !needsApproval &&
+    (needsRoute ? !!quote || canFallback : true)
 
-  // Transaction in progress
+  // ── Tx in progress ────────────────────────────────────────────────
   if (payment.status !== 'idle') {
     return (
       <TransactionStatus
@@ -101,6 +149,7 @@ export function PaymentForm({ config }: { config: PaymentConfig }) {
     )
   }
 
+  // ── Render ────────────────────────────────────────────────────────
   return (
     <div className="space-y-4">
       {/* Amount */}
@@ -109,7 +158,10 @@ export function PaymentForm({ config }: { config: PaymentConfig }) {
         <input
           type="number"
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          onChange={(e) => {
+            setAmount(e.target.value)
+            setApproved(false)
+          }}
           placeholder="0.00"
           min="0"
           step="any"
@@ -124,7 +176,10 @@ export function PaymentForm({ config }: { config: PaymentConfig }) {
           {PAY_TOKENS.map((t) => (
             <button
               key={t.symbol}
-              onClick={() => setSelectedToken(t)}
+              onClick={() => {
+                setSelectedToken(t)
+                setApproved(false)
+              }}
               className={`px-4 py-3 rounded-xl border text-sm font-medium transition-all ${
                 selectedToken.symbol === t.symbol
                   ? 'border-blue-500 bg-blue-500/10 text-blue-400'
@@ -149,34 +204,69 @@ export function PaymentForm({ config }: { config: PaymentConfig }) {
       )}
 
       {/* Cross-chain banner */}
-      {isConnected && isCrossChain && (
+      {isConnected && isCrossChain && !lifiUnavailable && (
         <div className="px-4 py-3 rounded-xl bg-purple-500/5 border border-purple-500/20">
           <p className="text-sm text-purple-300">
             Cross-chain payment:{' '}
-            <span className="font-medium">
-              {CHAIN_META[chainId]?.name ?? 'Unknown'}
-            </span>{' '}
-            &rarr;{' '}
-            <span className="font-medium">
-              {CHAIN_META[merchantChainId]?.name ?? 'Unknown'}
-            </span>
+            <span className="font-medium">{CHAIN_META[chainId]?.name ?? 'Unknown'}</span>
+            {' '}&rarr;{' '}
+            <span className="font-medium">{CHAIN_META[merchantChainId]?.name ?? 'Unknown'}</span>
           </p>
-          <p className="text-xs text-purple-400/60 mt-1">
-            Routed via LI.FI for the best rate
+          <p className="text-xs text-purple-400/60 mt-1">Routed via LI.FI for the best rate</p>
+        </div>
+      )}
+
+      {/* Route preview (only when LI.FI is active, not in fallback) */}
+      {needsRoute && validAmount && isConnected && !canFallback && (
+        <RoutePreview quote={quote} loading={quoteLoading} error={quoteError} />
+      )}
+
+      {/* Same-chain fallback banner */}
+      {canFallback && validAmount && isConnected && (
+        <div className="px-4 py-3 rounded-xl bg-yellow-500/5 border border-yellow-500/20">
+          <p className="text-sm text-yellow-300">
+            LI.FI routing unavailable on this network
+          </p>
+          <p className="text-xs text-yellow-400/60 mt-1">
+            Sending {selectedToken.symbol} directly to {config.name}
           </p>
         </div>
       )}
 
-      {/* Route preview */}
-      {needsRoute && validAmount && isConnected && (
-        <RoutePreview quote={quote} loading={quoteLoading} error={quoteError} />
+      {/* Cross-chain + no route = stuck */}
+      {isCrossChain && lifiUnavailable && (
+        <div className="px-4 py-3 rounded-xl bg-red-500/5 border border-red-500/20">
+          <p className="text-sm text-red-400">
+            Cross-chain routing unavailable on this network pair
+          </p>
+          <p className="text-xs text-red-400/60 mt-1">
+            Switch to{' '}
+            <span className="font-medium">{CHAIN_META[merchantChainId]?.name}</span>{' '}
+            for a direct payment.
+          </p>
+        </div>
       )}
 
-      {/* Action */}
+      {/* Action area */}
       {!isConnected ? (
         <div className="flex justify-center pt-2">
           <ConnectButton />
         </div>
+      ) : needsApproval ? (
+        <button
+          onClick={handleApprove}
+          disabled={approving}
+          className="w-full py-4 rounded-xl font-semibold text-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25"
+        >
+          {approving ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Approving&hellip;
+            </span>
+          ) : (
+            `Approve ${selectedToken.symbol}`
+          )}
+        </button>
       ) : (
         <button
           onClick={handlePay}
@@ -185,7 +275,9 @@ export function PaymentForm({ config }: { config: PaymentConfig }) {
         >
           {quoteLoading
             ? 'Finding best route...'
-            : `Pay ${amount || '0'} ${selectedToken.symbol}`}
+            : canFallback
+              ? `Pay ${amount || '0'} ${selectedToken.symbol} (direct)`
+              : `Pay ${amount || '0'} ${selectedToken.symbol}`}
         </button>
       )}
 
