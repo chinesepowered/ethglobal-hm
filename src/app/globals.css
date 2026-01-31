@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 11, 11, 15;
+}
+
+body {
+  background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(82, 152, 255, 0.06) 0%, transparent 50%),
+              rgb(var(--bg));
+}
+
+/* Hide number input spinners */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+html {
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+}
+
+/* Selection */
+::selection {
+  background: rgba(82, 152, 255, 0.3);
+}
