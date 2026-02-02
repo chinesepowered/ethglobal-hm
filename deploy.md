@@ -6,14 +6,6 @@ The fastest path. Vercel has native Next.js support.
 
 ### 1. Prerequisites
 
-Before deploying, you need two things:
-
-**WalletConnect Project ID** (required for wallet connections)
-1. Go to [cloud.walletconnect.com](https://cloud.walletconnect.com)
-2. Sign up / log in
-3. Create a new project
-4. Copy the Project ID
-
 **ENS Name on Sepolia** (required for testing the demo)
 1. Go to [app.ens.domains](https://app.ens.domains)
 2. Switch your wallet to Sepolia network
@@ -46,7 +38,6 @@ Set these in the Vercel dashboard under **Settings > Environment Variables**:
 
 | Variable | Value | Required |
 |----------|-------|----------|
-| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | Your WalletConnect project ID | Yes |
 | `NEXT_PUBLIC_TESTNET` | `true` | Yes (for Sepolia demo) |
 | `NEXT_PUBLIC_MAINNET_RPC` | Your Ethereum RPC URL (e.g. Alchemy/Infura) | Recommended |
 | `NEXT_PUBLIC_SEPOLIA_RPC` | Your Sepolia RPC URL | Recommended |
@@ -58,7 +49,7 @@ Set these in the Vercel dashboard under **Settings > Environment Variables**:
 After deployment, verify each step of the demo flow:
 
 - [ ] Landing page loads at your Vercel URL
-- [ ] Wallet connects via RainbowKit (MetaMask, WalletConnect, etc.)
+- [ ] Wallet connects via MetaMask (or any injected wallet)
 - [ ] Navigate to `/setup`, enter your Sepolia ENS name
 - [ ] Set USDC + Sepolia, click Save — ENS text records write successfully
 - [ ] Navigate to `/pay/yourname.eth` — ENS profile resolves (avatar, address, badges)
@@ -86,7 +77,6 @@ cp .env.example .env
 
 Edit `.env`:
 ```
-NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_id_here
 NEXT_PUBLIC_TESTNET=true
 ```
 

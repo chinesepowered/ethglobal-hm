@@ -23,7 +23,7 @@ ENS PayLinks is a Next.js 14 web app that lets users pay any ENS name from any E
 | react / react-dom | 18.3.x | UI framework |
 | wagmi | 2.12.x | React hooks for Ethereum (accounts, contracts, ENS) |
 | viem | 2.21.x | Low-level Ethereum client (ENS resolution, tx building) |
-| @rainbow-me/rainbowkit | 2.2.x | Wallet connection modal |
+| wagmi/connectors (injected) | — | Wallet connection (MetaMask, etc.) |
 | @tanstack/react-query | 5.59.x | Async state management (used by wagmi) |
 | tailwindcss | 3.4.x | Utility-first CSS |
 | typescript | 5.6.x | Type checking (strict mode) |
@@ -44,7 +44,7 @@ src/
 │   └── setup/page.tsx          # Merchant setup page (server component shell)
 │
 ├── components/
-│   ├── Header.tsx              # Sticky nav bar with RainbowKit ConnectButton
+│   ├── Header.tsx              # Sticky nav bar with custom ConnectButton
 │   ├── Footer.tsx              # Sponsor attribution footer
 │   ├── ENSProfile.tsx          # Displays avatar, name, address, token/chain badges
 │   ├── PaymentForm.tsx         # Main payment UI: amount, token selector, route, pay
@@ -64,7 +64,7 @@ src/
 │   └── lifi.ts                 # getQuote(), getTokens(), formatters — wraps LI.FI REST API
 │
 └── providers/
-    └── Web3Provider.tsx        # wagmi + RainbowKit + React Query provider (client-only)
+    └── Web3Provider.tsx        # wagmi + injected connector + React Query provider (client-only)
 ```
 
 ---
@@ -164,7 +164,6 @@ User clicks Pay → usePayment hook
 
 | Variable | Required | Default | Purpose |
 |----------|----------|---------|---------|
-| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | Yes | `MISSING_PROJECT_ID` | WalletConnect v2 project ID |
 | `NEXT_PUBLIC_TESTNET` | No | `undefined` | Set to `"true"` to resolve ENS on Sepolia |
 | `NEXT_PUBLIC_MAINNET_RPC` | No | Public default | Custom Ethereum mainnet RPC URL |
 | `NEXT_PUBLIC_SEPOLIA_RPC` | No | Public default | Custom Sepolia RPC URL |

@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useAccount, useBalance, useChainId, useReadContract, useWriteContract } from 'wagmi'
 import { parseUnits, formatUnits, erc20Abi } from 'viem'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { ConnectButton } from './ConnectButton'
 import { PaymentConfig } from '@/lib/ens'
 import { useLiFiQuote } from '@/hooks/useLiFiQuote'
 import { usePayment } from '@/hooks/usePayment'

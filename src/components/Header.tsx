@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { ConnectButton } from './ConnectButton'
 
 export function Header() {
   return (
@@ -23,11 +23,7 @@ export function Header() {
           >
             Accept Payments
           </Link>
-          <ConnectButton
-            accountStatus="avatar"
-            showBalance={false}
-            chainStatus="icon"
-          />
+          <ConnectButton />
         </div>
       </div>
     </header>

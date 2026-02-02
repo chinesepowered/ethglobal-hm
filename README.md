@@ -76,7 +76,7 @@ Visit `/pay/name.eth`. The app resolves the ENS name to an address and reads the
 - **Next.js 14** (App Router, server components + client islands)
 - **TypeScript** (strict mode)
 - **wagmi v2 + viem v2** (Ethereum interactions, ENS resolution)
-- **RainbowKit v2** (wallet connection)
+- **MetaMask / injected wallet** (wallet connection via wagmi)
 - **Tailwind CSS** (dark-mode UI)
 - **LI.FI REST API** (cross-chain quotes + execution)
 
@@ -91,8 +91,7 @@ cp .env.example .env
 
 Edit `.env`:
 ```
-NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=<your-id>  # https://cloud.walletconnect.com
-NEXT_PUBLIC_TESTNET=true                         # use Sepolia ENS for testing
+NEXT_PUBLIC_TESTNET=true   # use Sepolia ENS for testing
 ```
 
 ```bash
@@ -133,7 +132,7 @@ src/
 │   ├── constants.ts        # USDC addresses, ENS keys, chain metadata
 │   └── chains.ts           # Supported chain definitions
 └── providers/
-    └── Web3Provider.tsx     # wagmi + RainbowKit + React Query setup
+    └── Web3Provider.tsx     # wagmi + React Query provider setup
 ```
 
 ## License
