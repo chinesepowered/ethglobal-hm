@@ -48,7 +48,8 @@ export function SetupForm() {
   const { config: existingConfig } = usePaymentConfig(ensName || undefined)
   const { writeContractAsync } = useWriteContract()
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined)
-  useWaitForTransactionReceipt({ hash: txHash })
+  // Only subscribe to transaction receipt when we have a valid hash
+  useWaitForTransactionReceipt({ hash: txHash, query: { enabled: !!txHash } })
 
   // Get resolver for the ENS name (dynamic lookup or fallback to known address)
   async function getResolver(): Promise<`0x${string}` | null> {
