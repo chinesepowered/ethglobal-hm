@@ -15,7 +15,23 @@ const config = getDefaultConfig({
 })
 
 export function Web3Provider({ children }: { children: ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient())
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            // Retry up to 2 times for transient network errors
+            retry: 2,
+            retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+            // Suppress "connection interrupted" subscription errors
+            throwOnError: false,
+          },
+          mutations: {
+            throwOnError: false,
+          },
+        },
+      }),
+  )
 
   return (
     <WagmiProvider config={config}>

@@ -25,7 +25,7 @@ export function TransactionStatus({
   token,
   onReset,
 }: Props) {
-  const { isSuccess } = useWaitForTransactionReceipt({ hash: txHash })
+  const { isSuccess } = useWaitForTransactionReceipt({ hash: txHash, query: { enabled: !!txHash } })
   const chain = CHAIN_META[chainId]
   const explorerUrl = txHash ? `${chain?.explorer ?? 'https://etherscan.io'}/tx/${txHash}` : null
   const resolved = isSuccess ? 'success' : status
