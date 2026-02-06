@@ -287,8 +287,6 @@ export function PaymentForm({ config }: { config: PaymentConfig }) {
         <span className="text-xs text-blue-400/80 font-medium">ENS</span>
         <span className="text-gray-700">&middot;</span>
         <span className="text-xs text-purple-400/80 font-medium">LI.FI</span>
-        <span className="text-gray-700">&middot;</span>
-        <span className="text-xs text-green-400/80 font-medium">Circle</span>
       </div>
     </div>
   )

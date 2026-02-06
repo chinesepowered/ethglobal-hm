@@ -8,10 +8,9 @@ This document describes the ENS PayLinks codebase in detail so an AI coding agen
 
 ENS PayLinks is a Next.js 14 web app that lets users pay any ENS name from any EVM chain. The merchant stores payment preferences (token, chain, description) as ENS text records. The payer visits `/pay/name.eth`, the app resolves the config from ENS, gets a cross-chain route from LI.FI, and executes the payment.
 
-**Three sponsor integrations:**
+**Two sponsor integrations:**
 - **ENS**: Name resolution + text record read/write (identity & config layer)
 - **LI.FI**: Cross-chain routing via REST API (swap + bridge execution)
-- **Circle**: USDC settlement (default receive token for merchants)
 
 ---
 
@@ -167,7 +166,6 @@ User clicks Pay → usePayment hook
 | `NEXT_PUBLIC_TESTNET` | No | `undefined` | Set to `"true"` to resolve ENS on Sepolia |
 | `NEXT_PUBLIC_MAINNET_RPC` | No | Public default | Custom Ethereum mainnet RPC URL |
 | `NEXT_PUBLIC_SEPOLIA_RPC` | No | Public default | Custom Sepolia RPC URL |
-| `CIRCLE_API_KEY` | No | — | Placeholder for Circle API integration |
 
 ---
 
@@ -206,17 +204,13 @@ All keys are namespaced under `com.enspaylinks.`:
 
 3. **LI.FI testnet support**: LI.FI may not return routes for all testnet pairs. On testnets, the app falls back to direct ETH transfers for same-chain payments. Cross-chain testnet payments require LI.FI support for the chain pair.
 
-4. **Circle integration depth**: Currently Circle/USDC is the settlement token, but deeper Circle integration (Programmable Wallets, Gateway, Bridge Kit) is stubbed but not implemented. The `CIRCLE_API_KEY` env var exists but no API routes use it yet.
-
-5. **No payment receipts or history**: Transactions complete and show a success screen with an explorer link, but there's no persistent receipt storage or payment history view.
+4. **No payment receipts or history**: Transactions complete and show a success screen with an explorer link, but there's no persistent receipt storage or payment history view.
 
 ### Implemented
 - **ERC-20 approval flow**: PaymentForm detects when LI.FI's `approvalAddress` needs an allowance, checks current allowance via `erc20Abi.allowance`, and shows a two-step "Approve → Pay" UI.
 - **LI.FI fallback**: When LI.FI returns no route (common on testnets), same-chain payments fall back to direct ETH transfer with a yellow banner explaining the fallback. Cross-chain shows a red error suggesting the user switch chains.
 
 ### Planned Improvements
-- **Circle Programmable Wallets**: Let merchants create a Circle-hosted wallet during setup for those who don't have their own
-- **Circle Gateway integration**: Server-side API route to verify USDC settlement and provide fiat off-ramp
 - **Payment history**: Store payment metadata (payer, amount, token, chain, tx hash, timestamp) via ENS text records or an offchain index
 - **Multi-token support**: Add DAI, WETH, WBTC as receive options with address mappings
 - **ENS subname issuance**: Let merchants create payment-specific subnames (`invoice42.merchant.eth`)
@@ -257,10 +251,3 @@ npm run lint     # Run ESLint
 3. Read it in `resolvePaymentConfig()` in `src/lib/ens.ts`
 4. Write it in `handleSave()` in `src/components/SetupForm.tsx`
 5. Display it in `src/components/ENSProfile.tsx` or `PaymentForm.tsx`
-
-### Adding Circle API integration
-1. Create `src/app/api/circle/` directory with route handlers
-2. Use the `CIRCLE_API_KEY` env var for authentication
-3. Circle Wallets API: `POST /api/circle/wallets` to create merchant wallets
-4. Circle Gateway: verify USDC settlement on destination chain
-5. Wire up to SetupForm (wallet creation) and TransactionStatus (settlement verification)

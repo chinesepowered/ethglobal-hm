@@ -7,7 +7,7 @@ import { Footer } from '@/components/Footer'
 export const metadata: Metadata = {
   title: 'ENS PayLinks - Pay anyone with their ENS name',
   description:
-    'Cross-chain payments to any ENS name. Send from any token on any chain, they receive USDC. Powered by ENS, LI.FI, and Circle.',
+    'Cross-chain payments to any ENS name. Send from any token on any chain. Powered by ENS and LI.FI.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -145,17 +145,17 @@ Use this script to walk through ENS PayLinks while highlighting each sponsor int
 
 *[SPONSOR: LI.FI — real-time quote from li.quest/v1/quote API]*
 
-**[1:30 - 1:50] Payment Execution (Circle/USDC Settlement)**
+**[1:30 - 1:50] Payment Execution**
 
 *Click Pay, confirm in MetaMask*
 
-> "I click Pay, confirm in my wallet, and the merchant receives **USDC** — the stablecoin they actually want. No volatility, instant settlement."
+> "I click Pay, confirm in my wallet, and **LI.FI executes the swap** — the merchant receives exactly what they asked for. No manual bridging, no token conversions for the user."
 
-*[SPONSOR: Circle — USDC as the settlement layer]*
+*[SPONSOR: LI.FI — transaction execution with LI.FI calldata]*
 
 **[1:50 - 2:00] Wrap-up**
 
-> "ENS PayLinks: your ENS name becomes your payment link. Cross-chain, any token in, USDC out. Built with ENS for identity, LI.FI for routing, and Circle's USDC for settlement."
+> "ENS PayLinks: your ENS name becomes your payment link. Cross-chain, any token in, merchant's choice out. Built with ENS for identity and LI.FI for cross-chain routing."
 
 ---
 

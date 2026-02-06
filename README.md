@@ -66,11 +66,6 @@ Visit `/pay/name.eth`. The app resolves the ENS name to an address and reads the
 - **Single-tx execution**: Payer signs once; LI.FI handles swap + bridge + delivery
 - **Route preview**: Shows fees, estimated time, and path breakdown before signing
 
-### Circle -- USDC Settlement
-- **Default settlement token**: Merchants receive USDC by default -- stable, predictable value
-- **Multi-chain USDC**: Supports USDC addresses on Ethereum, Base, Arbitrum, Optimism, Sepolia, Base Sepolia
-- **Cross-chain USDC routing**: When both source and destination are USDC, routing is optimized for USDC-native paths
-
 ## Tech Stack
 
 - **Next.js 14** (App Router, server components + client islands)
