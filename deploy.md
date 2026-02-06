@@ -109,6 +109,56 @@ railway up
 
 ---
 
+## 2-Minute Demo Script
+
+Use this script to walk through ENS PayLinks while highlighting each sponsor integration.
+
+---
+
+**[0:00 - 0:20] The Problem**
+
+> "Accepting crypto payments is broken. As a merchant, I need to give customers a wallet address, tell them which chain, which token — and hope they don't make mistakes. ENS PayLinks fixes this."
+
+**[0:20 - 0:50] Merchant Setup (ENS Integration)**
+
+*Navigate to `/setup`, connect wallet, enter your ENS name*
+
+> "I'm a merchant with an ENS name. I go to the setup page, enter my name, and choose how I want to be paid — USDC on Ethereum."
+
+*Click Save, sign the transaction*
+
+> "This writes my payment preferences directly to my **ENS text records**. One transaction, stored on-chain forever. **ENS becomes my payment identity** — not just a name, but my entire payment configuration."
+
+*[SPONSOR: ENS — text record write via multicall on PublicResolver]*
+
+**[0:50 - 1:30] Payer Checkout (LI.FI + ENS Integration)**
+
+*Open a new browser/profile, navigate to `/pay/yourname.eth`*
+
+> "Now I'm a customer. I just go to `pay/merchant.eth`. The app resolves the merchant's ENS name, reads their payment config, and shows me this checkout page."
+
+*[SPONSOR: ENS — name + text record resolution via viem]*
+
+*Enter an amount, keep ETH selected, show the route preview*
+
+> "I want to pay with ETH, but the merchant wants USDC. **LI.FI automatically finds the best route** — it'll swap my ETH to USDC and deliver it to the merchant. One click, cross-chain compatible."
+
+*[SPONSOR: LI.FI — real-time quote from li.quest/v1/quote API]*
+
+**[1:30 - 1:50] Payment Execution (Circle/USDC Settlement)**
+
+*Click Pay, confirm in MetaMask*
+
+> "I click Pay, confirm in my wallet, and the merchant receives **USDC** — the stablecoin they actually want. No volatility, instant settlement."
+
+*[SPONSOR: Circle — USDC as the settlement layer]*
+
+**[1:50 - 2:00] Wrap-up**
+
+> "ENS PayLinks: your ENS name becomes your payment link. Cross-chain, any token in, USDC out. Built with ENS for identity, LI.FI for routing, and Circle's USDC for settlement."
+
+---
+
 ## Demo Day Tips
 
 1. **Pre-fund your wallets.** Get Sepolia ETH from [sepoliafaucet.com](https://sepoliafaucet.com) or [cloud.google.com/application/web3/faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia). Fund both your merchant wallet and a separate payer wallet.
