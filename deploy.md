@@ -6,14 +6,6 @@ The fastest path. Vercel has native Next.js support.
 
 ### 1. Prerequisites
 
-Before deploying, you need two things:
-
-**WalletConnect Project ID** (required for wallet connections)
-1. Go to [cloud.walletconnect.com](https://cloud.walletconnect.com)
-2. Sign up / log in
-3. Create a new project
-4. Copy the Project ID
-
 **ENS Name on Sepolia** (required for testing the demo)
 1. Go to [app.ens.domains](https://app.ens.domains)
 2. Switch your wallet to Sepolia network
@@ -46,7 +38,6 @@ Set these in the Vercel dashboard under **Settings > Environment Variables**:
 
 | Variable | Value | Required |
 |----------|-------|----------|
-| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | Your WalletConnect project ID | Yes |
 | `NEXT_PUBLIC_TESTNET` | `true` | Yes (for Sepolia demo) |
 | `NEXT_PUBLIC_MAINNET_RPC` | Your Ethereum RPC URL (e.g. Alchemy/Infura) | Recommended |
 | `NEXT_PUBLIC_SEPOLIA_RPC` | Your Sepolia RPC URL | Recommended |
@@ -58,7 +49,7 @@ Set these in the Vercel dashboard under **Settings > Environment Variables**:
 After deployment, verify each step of the demo flow:
 
 - [ ] Landing page loads at your Vercel URL
-- [ ] Wallet connects via RainbowKit (MetaMask, WalletConnect, etc.)
+- [ ] Wallet connects via MetaMask (or any injected wallet)
 - [ ] Navigate to `/setup`, enter your Sepolia ENS name
 - [ ] Set USDC + Sepolia, click Save — ENS text records write successfully
 - [ ] Navigate to `/pay/yourname.eth` — ENS profile resolves (avatar, address, badges)
@@ -86,7 +77,6 @@ cp .env.example .env
 
 Edit `.env`:
 ```
-NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_id_here
 NEXT_PUBLIC_TESTNET=true
 ```
 
@@ -116,6 +106,56 @@ railway up
 3. Build command: `npm run build`
 4. Start command: `npm run start`
 5. Add environment variables in the dashboard
+
+---
+
+## 2-Minute Demo Script
+
+Use this script to walk through ENS PayLinks while highlighting each sponsor integration.
+
+---
+
+**[0:00 - 0:20] The Problem**
+
+> "Accepting crypto payments is broken. As a merchant, I need to give customers a wallet address, tell them which chain, which token — and hope they don't make mistakes. ENS PayLinks fixes this."
+
+**[0:20 - 0:50] Merchant Setup (ENS Integration)**
+
+*Navigate to `/setup`, connect wallet, enter your ENS name*
+
+> "I'm a merchant with an ENS name. I go to the setup page, enter my name, and choose how I want to be paid — USDC on Ethereum."
+
+*Click Save, sign the transaction*
+
+> "This writes my payment preferences directly to my **ENS text records**. One transaction, stored on-chain forever. **ENS becomes my payment identity** — not just a name, but my entire payment configuration."
+
+*[SPONSOR: ENS — text record write via multicall on PublicResolver]*
+
+**[0:50 - 1:30] Payer Checkout (LI.FI + ENS Integration)**
+
+*Open a new browser/profile, navigate to `/pay/yourname.eth`*
+
+> "Now I'm a customer. I just go to `pay/merchant.eth`. The app resolves the merchant's ENS name, reads their payment config, and shows me this checkout page."
+
+*[SPONSOR: ENS — name + text record resolution via viem]*
+
+*Enter an amount, keep ETH selected, show the route preview*
+
+> "I want to pay with ETH, but the merchant wants USDC. **LI.FI automatically finds the best route** — it'll swap my ETH to USDC and deliver it to the merchant. One click, cross-chain compatible."
+
+*[SPONSOR: LI.FI — real-time quote from li.quest/v1/quote API]*
+
+**[1:30 - 1:50] Payment Execution**
+
+*Click Pay, confirm in MetaMask*
+
+> "I click Pay, confirm in my wallet, and **LI.FI executes the swap** — the merchant receives exactly what they asked for. No manual bridging, no token conversions for the user."
+
+*[SPONSOR: LI.FI — transaction execution with LI.FI calldata]*
+
+**[1:50 - 2:00] Wrap-up**
+
+> "ENS PayLinks: your ENS name becomes your payment link. Cross-chain, any token in, merchant's choice out. Built with ENS for identity and LI.FI for cross-chain routing."
 
 ---
 

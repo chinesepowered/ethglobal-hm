@@ -27,8 +27,8 @@ export default function Home() {
           </span>
         </h1>
         <p className="text-base sm:text-lg text-gray-400 max-w-lg mx-auto">
-          Send from any token on any chain. They receive USDC on their preferred
-          chain. Powered by ENS, LI.FI, and Circle.
+          Send from any token on any chain. They receive their preferred token.
+          Powered by ENS and LI.FI.
         </p>
       </div>
 
@@ -76,12 +76,12 @@ export default function Home() {
         <Card
           icon={
             <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           }
           color="green"
-          title="USDC Settlement"
-          text="Merchants always receive USDC. Powered by Circle for reliable stablecoin settlement."
+          title="One Click"
+          text="Payer signs once. LI.FI handles the swap, bridge, and delivery automatically."
         />
       </div>
 

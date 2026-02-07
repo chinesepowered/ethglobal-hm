@@ -7,8 +7,6 @@ export function Footer() {
           <span className="text-blue-400 font-medium">ENS</span>
           <span>&middot;</span>
           <span className="text-purple-400 font-medium">LI.FI</span>
-          <span>&middot;</span>
-          <span className="text-green-400 font-medium">Circle</span>
         </div>
         <p className="text-sm text-gray-600">ETHGlobal HackMoney 2025</p>
       </div>

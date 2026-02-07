@@ -1,16 +1,22 @@
 'use client'
 
 import { ReactNode, useState } from 'react'
-import { getDefaultConfig, RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit'
-import { WagmiProvider } from 'wagmi'
+import { WagmiProvider, createConfig, http } from 'wagmi'
+import { injected } from 'wagmi/connectors'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { mainnet, base, arbitrum, optimism, sepolia, baseSepolia } from 'wagmi/chains'
-import '@rainbow-me/rainbowkit/styles.css'
 
-const config = getDefaultConfig({
-  appName: 'ENS PayLinks',
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'MISSING_PROJECT_ID',
+const config = createConfig({
   chains: [mainnet, sepolia, base, baseSepolia, arbitrum, optimism],
+  connectors: [injected()],
+  transports: {
+    [mainnet.id]: http(process.env.NEXT_PUBLIC_MAINNET_RPC),
+    [sepolia.id]: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC),
+    [base.id]: http(),
+    [baseSepolia.id]: http(),
+    [arbitrum.id]: http(),
+    [optimism.id]: http(),
+  },
   ssr: true,
 })
 
@@ -36,16 +42,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider
-          theme={darkTheme({
-            accentColor: '#5298FF',
-            accentColorForeground: 'white',
-            borderRadius: 'medium',
-            overlayBlur: 'small',
-          })}
-        >
-          {children}
-        </RainbowKitProvider>
+        {children}
       </QueryClientProvider>
     </WagmiProvider>
   )

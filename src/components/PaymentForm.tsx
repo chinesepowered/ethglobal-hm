@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useAccount, useBalance, useChainId, useReadContract, useWriteContract } from 'wagmi'
 import { parseUnits, formatUnits, erc20Abi } from 'viem'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { ConnectButton } from './ConnectButton'
 import { PaymentConfig } from '@/lib/ens'
 import { useLiFiQuote } from '@/hooks/useLiFiQuote'
 import { usePayment } from '@/hooks/usePayment'
@@ -287,8 +287,6 @@ export function PaymentForm({ config }: { config: PaymentConfig }) {
         <span className="text-xs text-blue-400/80 font-medium">ENS</span>
         <span className="text-gray-700">&middot;</span>
         <span className="text-xs text-purple-400/80 font-medium">LI.FI</span>
-        <span className="text-gray-700">&middot;</span>
-        <span className="text-xs text-green-400/80 font-medium">Circle</span>
       </div>
     </div>
   )

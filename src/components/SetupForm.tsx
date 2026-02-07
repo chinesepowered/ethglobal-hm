@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useAccount, usePublicClient, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { ConnectButton } from './ConnectButton'
 import { namehash } from 'viem/ens'
 import { normalize } from 'viem/ens'
 import { encodeFunctionData } from 'viem'
