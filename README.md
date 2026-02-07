@@ -4,6 +4,8 @@
 
 Pay anyone using their ENS name. Send from any token on any chain -- they receive USDC (or their preferred token) on their preferred chain. No sign-ups, no databases, no intermediaries.
 
+[Slide Deck](https://github.com/chinesepowered/ethglobal-hm/blob/main/public/ENS-PayLinks.pdf)
+
 ---
 
 ## The Problem
@@ -129,7 +131,3 @@ src/
 └── providers/
     └── Web3Provider.tsx     # wagmi + React Query provider setup
 ```
-
-## License
-
-MIT
